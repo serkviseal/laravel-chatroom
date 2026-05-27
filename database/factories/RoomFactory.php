@@ -1,12 +1,16 @@
 <?php
 
-use App\User;
-use App\Room;
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(Room::class, function (Faker $faker) {
-    return [
-        'name' => $faker->name,
-        'description' => $faker->sentence
-    ];
-});
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class RoomFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->unique()->words(3, true),
+            'description' => fake()->sentence(),
+        ];
+    }
+}

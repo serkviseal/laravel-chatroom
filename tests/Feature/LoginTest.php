@@ -1,23 +1,30 @@
 <?php
 
-namespace Tests\Feature;
-
-use App\User;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class LoginTest extends TestCase
-{
-    public function testCanLogin()
-    {
-        $user = factory(User::class)->create();
+uses(RefreshDatabase::class);
 
-        $response = $this->post('/login', [
-            'email' => $user->email, 
-            'password' => $user->password
-        ]);
+test('user can login with correct credentials', function () {
+    $user = User::factory()->create();
 
-        $response->assertStatus(302);
-    }
-}
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])
+        ->assertRedirect('/home');
+
+    $this->assertAuthenticatedAs($user);
+});
+
+test('user cannot login with wrong password', function () {
+    $user = User::factory()->create();
+
+    $this->post('/login', ['email' => $user->email, 'password' => 'wrong'])
+        ->assertSessionHasErrors('email');
+
+    $this->assertGuest();
+});
+
+test('user can logout', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user)->post('/logout')->assertRedirect('/');
+    $this->assertGuest();
+});

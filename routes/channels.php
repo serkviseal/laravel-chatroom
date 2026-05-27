@@ -1,36 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Broadcast;
 
-/*
-|--------------------------------------------------------------------------
-| Broadcast Channels
-|--------------------------------------------------------------------------
-|
-| Here you may register all of the event broadcasting channels that your
-| application supports. The given channel authorization callbacks are
-| used to check if an authenticated user can listen to the channel.
-|
-*/
-
-Broadcast::channel('App.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+// Private notification channel per user
+Broadcast::channel('App.Models.User.{id}', function (User $user, int $id) {
+    return $user->id === $id;
 });
 
-/**
- * Authorize room.{roomId} channel 
- * for authenticated users
- */
-Broadcast::channel('room.{roomId}', function ($user, $roomId) {
+// Presence channel for a chat room — returns user data on join
+Broadcast::channel('room.{roomId}', function (User $user, int $roomId) {
     if ($user->hasJoined($roomId)) {
         return [
             'id' => $user->id,
             'name' => $user->name,
-            'email' => $user->email
+            'avatar_url' => $user->avatar_url,
         ];
     }
 });
 
-Broadcast::channel('message', function ($user) {
-    return Auth::check();
+// Private channel for 1-on-1 direct messages
+Broadcast::channel('dm.{a}-{b}', function (User $user, int $a, int $b) {
+    return in_array($user->id, [$a, $b]);
 });

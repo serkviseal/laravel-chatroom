@@ -1,26 +1,29 @@
 <?php
 
-namespace Tests\Feature;
-
-use App\User;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class RegisterTest extends TestCase
-{
-    public function testCanRegister()
-    {
-        $user = factory(User::class)->make();
+uses(RefreshDatabase::class);
 
-        $response = $this->post('/register', [
-            'name' => $user->name,
-            'email' => $user->email,
-            'password' => 'secret',
-            'password_confirmation' => 'secret'
-        ]);
+test('user can register', function () {
+    $this->post('/register', [
+        'name' => 'Alice',
+        'email' => 'alice@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertRedirect('/home');
 
-        $response->assertStatus(302);
-        $response->assertLocation('rooms');
-    }
-}
+    $this->assertDatabaseHas('users', ['email' => 'alice@example.com']);
+    $this->assertAuthenticated();
+});
+
+test('registration requires a unique email', function () {
+    User::factory()->create(['email' => 'alice@example.com']);
+
+    $this->post('/register', [
+        'name' => 'Alice2',
+        'email' => 'alice@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertSessionHasErrors('email');
+});

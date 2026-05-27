@@ -2,47 +2,29 @@
 
 namespace App\Events;
 
-use App\Room;
-use App\Message;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Foundation\Events\Dispatchable;
+use App\Http\Resources\MessageResource;
+use App\Models\Message;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 class MessageCreated implements ShouldBroadcast
 {
-    use Dispatchable, SerializesModels, InteractsWithSockets;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * The queue on which to broadcast the event
-     */
-    public $broadcastQueue = 'events:message-created';
+    public string $broadcastQueue = 'events:message-created';
 
-    /**
-     * The message to be broadcasted
-     */
-    public $message;
+    public function __construct(public Message $message) {}
 
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
-    public function __construct(Message $message)
+    public function broadcastOn(): array
     {
-        $this->message = $message;
+        return [new PresenceChannel('room.'.$this->message->room_id)];
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-    public function broadcastOn()
+    public function broadcastWith(): array
     {
-        return new PresenceChannel('room.'. $this->message->room_id);
+        return (new MessageResource($this->message))->resolve();
     }
 }

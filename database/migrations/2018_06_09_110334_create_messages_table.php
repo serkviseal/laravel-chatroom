@@ -1,34 +1,28 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateMessagesTable extends Migration
+return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->increments('id');
-            $table->longText('body');
-            $table->bigInteger('user_id')->index();
-            $table->bigInteger('room_id')->index();
+            $table->id();
+            $table->text('body')->nullable();
+            $table->string('type')->default('text'); // text | image | file
+            $table->string('attachment_path')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
+            $table->timestamp('edited_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('messages');
     }
-}
+};

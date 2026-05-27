@@ -1,44 +1,37 @@
 <?php
 
-namespace Tests\Unit;
-
-use App\User;
-use App\Room;
-use App\Message;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class UserTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    private $user;
+test('user can add a room', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
 
-    private $room;
+    $user->addRoom($room);
 
-    public function setUp()
-    {
-        parent::setUp();
+    expect($user->rooms()->where('rooms.id', $room->id)->exists())->toBeTrue();
+});
 
-        $this->user = factory(User::class)->create();
-        $this->room = factory(Room::class)->create();
-    }
+test('hasJoined returns true when user has joined', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+    $room->join($user);
 
-    public function testCanAddRoom()
-    {
-        $this->user->addRoom($this->room);
+    expect($user->hasJoined($room->id))->toBeTrue();
+});
 
-        $found = $this->user->rooms->where('id', $this->room->id)->first();
+test('hasJoined returns false when user has not joined', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
 
-        $this->assertInstanceOf(Room::class, $found);
-        $this->assertEquals($this->room->id, $found->id);
-    }
+    expect($user->hasJoined($room->id))->toBeFalse();
+});
 
-    public function testUserHasJoinedRoom()
-    {
-        $this->room->join($this->user);
+test('avatar url falls back to ui-avatars when no avatar set', function () {
+    $user = User::factory()->create(['name' => 'Alice Test', 'avatar' => null]);
 
-        $this->assertTrue($this->user->hasJoined($this->room->id));
-    }
-}
+    expect($user->avatar_url)->toContain('ui-avatars.com');
+});

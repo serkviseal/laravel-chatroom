@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_DRIVER', 'file'),
+    'default' => env('CACHE_STORE', env('CACHE_DRIVER', 'database')),
 
     /*
     |--------------------------------------------------------------------------
@@ -86,9 +86,6 @@ return [
     |
     */
 
-    'prefix' => env(
-        'CACHE_PREFIX',
-        str_slug(env('APP_NAME', 'laravel'), '_').'_cache'
-    ),
+    'prefix' => env('CACHE_PREFIX', 'chatroom_cache'),
 
 ];

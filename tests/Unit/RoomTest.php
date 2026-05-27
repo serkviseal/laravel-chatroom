@@ -1,27 +1,50 @@
 <?php
 
-namespace Tests\Unit;
-
-use App\User;
-use App\Room;
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class RoomTest extends TestCase
-{
-    use RefreshDatabase;
-    
-    public function testUserCanJoinRoom()
-    {
-        $user = factory(User::class)->create();
-        
-        $room = factory(Room::class)->create();
-        $room->join($user);
+uses(RefreshDatabase::class);
 
-        $found = $room->users->where('id', $user->id)->first();
+test('user can join a room', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
 
-        $this->assertInstanceOf(User::class, $found);
-        $this->assertEquals($user->id, $found->id);  
-    }
-}
+    $room->join($user);
+
+    $found = $room->users()->where('users.id', $user->id)->first();
+
+    expect($found)->toBeInstanceOf(User::class)
+        ->and($found->id)->toBe($user->id);
+});
+
+test('joining a room twice does not duplicate membership', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+
+    $room->join($user);
+    $room->join($user);
+
+    expect($room->users()->where('users.id', $user->id)->count())->toBe(1);
+});
+
+test('user can leave a room', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+    $room->join($user);
+
+    $room->leave($user);
+
+    expect($room->users()->where('users.id', $user->id)->exists())->toBeFalse();
+});
+
+test('room scope search filters by name', function () {
+    Room::factory()->create(['name' => 'backend chat']);
+    Room::factory()->create(['name' => 'frontend chat']);
+    Room::factory()->create(['name' => 'general']);
+
+    $results = Room::search('backend')->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results->first()->name)->toBe('backend chat');
+});

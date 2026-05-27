@@ -1,48 +1,102 @@
 <?php
 
-namespace Tests\Feature;
-
-use App\User;
-use App\Room;
-use Tests\TestCase;
 use App\Events\RoomJoined;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 
-class RoomTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    public function testCanCreateRoom()
-    {
-        $user = factory(User::class)->create();
+test('unauthenticated users cannot list rooms', function () {
+    $this->getJson('/api/v1/rooms')->assertUnauthorized();
+});
 
-        $response = $this->actingAs($user)
-                        ->post('rooms/store', [
-                            'name' => 'New room',
-                            'description' => 'This is a new room'
-                        ]);
-        
-        $this->assertDatabaseHas('rooms', [
-            'name' => 'New room',
-            'description' => 'This is a new room'
-        ]);
-    }
+test('authenticated users can list rooms', function () {
+    $user = User::factory()->create();
+    Room::factory(3)->create();
 
-    public function testCanBroadcastRoomJoinedEvent()
-    {
-        Event::fake();
+    $this->actingAs($user)
+        ->getJson('/api/v1/rooms')
+        ->assertOk()
+        ->assertJsonStructure(['data' => [['id', 'name', 'description', 'joined']]]);
+});
 
-        $user = factory(User::class)->create();
-        $room = factory(Room::class)->create();
+test('user can create a room', function () {
+    $user = User::factory()->create();
 
-        $response = $this->actingAs($user)
-                        ->post('rooms/' . $room->id . '/join');
+    $this->actingAs($user)
+        ->postJson('/api/v1/rooms', ['name' => 'test-room', 'description' => 'A test room'])
+        ->assertCreated()
+        ->assertJsonPath('data.name', 'test-room');
 
-        Event::assertDispatched(RoomJoined::class, function($e) use ($user, $room) {
-            return $e->user->id === $user->id &&
-                $e->room->id === $room->id;
-        });
-    }
-}
+    $this->assertDatabaseHas('rooms', ['name' => 'test-room']);
+});
+
+test('room name must be unique', function () {
+    $user = User::factory()->create();
+    Room::factory()->create(['name' => 'existing-room']);
+
+    $this->actingAs($user)
+        ->postJson('/api/v1/rooms', ['name' => 'existing-room'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('name');
+});
+
+test('creator automatically joins their room', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->postJson('/api/v1/rooms', ['name' => 'my-room'])
+        ->assertCreated();
+
+    $room = Room::find($response->json('data.id'));
+    expect($room->users()->where('users.id', $user->id)->exists())->toBeTrue();
+});
+
+test('user can join an existing room', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson("/api/v1/rooms/{$room->id}/join")
+        ->assertOk();
+
+    expect($user->hasJoined($room->id))->toBeTrue();
+});
+
+test('user can leave a room', function () {
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+    $room->join($user);
+
+    $this->actingAs($user)
+        ->postJson("/api/v1/rooms/{$room->id}/leave")
+        ->assertOk();
+
+    expect($user->fresh()->hasJoined($room->id))->toBeFalse();
+});
+
+test('rooms can be searched by name', function () {
+    $user = User::factory()->create();
+    Room::factory()->create(['name' => 'backend dev']);
+    Room::factory()->create(['name' => 'frontend dev']);
+    Room::factory()->create(['name' => 'general']);
+
+    $this->actingAs($user)
+        ->getJson('/api/v1/rooms?search=dev')
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+});
+
+test('joining a room dispatches RoomJoined event', function () {
+    Event::fake();
+    $user = User::factory()->create();
+    $room = Room::factory()->create();
+
+    $this->actingAs($user)->postJson("/api/v1/rooms/{$room->id}/join");
+
+    Event::assertDispatched(RoomJoined::class, fn ($e) =>
+        $e->user->id === $user->id && $e->room->id === $room->id
+    );
+});
