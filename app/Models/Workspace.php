@@ -62,6 +62,16 @@ class Workspace extends Model
         return $this->hasMany(Bot::class);
     }
 
+    public function whatsappAccounts(): HasMany
+    {
+        return $this->hasMany(WhatsAppAccount::class);
+    }
+
+    public function botRules(): HasMany
+    {
+        return $this->hasMany(BotRule::class);
+    }
+
     public function scopeForUser(Builder $query, User $user): Builder
     {
         return $query->whereHas('members', fn ($q) => $q->where('users.id', $user->id));

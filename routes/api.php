@@ -1,14 +1,18 @@
 <?php
 
+use App\Http\Controllers\Api\AgentAssistController;
 use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\InboxController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ThreadController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WhatsAppAccountController;
+use App\Http\Controllers\Api\WhatsAppWebhookController;
 use App\Http\Controllers\Api\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,7 +78,33 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/workspaces/{workspace}/bots', [BotController::class, 'store']);
     Route::post('/workspaces/{workspace}/bots/{bot}/token', [BotController::class, 'regenerateToken']);
     Route::delete('/workspaces/{workspace}/bots/{bot}', [BotController::class, 'destroy']);
+
+    // WhatsApp accounts
+    Route::get('/workspaces/{workspace}/whatsapp-accounts', [WhatsAppAccountController::class, 'index']);
+    Route::post('/workspaces/{workspace}/whatsapp-accounts', [WhatsAppAccountController::class, 'store']);
+    Route::put('/workspaces/{workspace}/whatsapp-accounts/{account}', [WhatsAppAccountController::class, 'update']);
+    Route::delete('/workspaces/{workspace}/whatsapp-accounts/{account}', [WhatsAppAccountController::class, 'destroy']);
+    Route::post('/workspaces/{workspace}/whatsapp-accounts/{account}/test', [WhatsAppAccountController::class, 'testConnection']);
+
+    // Agent inbox
+    Route::get('/workspaces/{workspace}/inbox', [InboxController::class, 'index']);
+    Route::put('/conversations/{conversation}/assign', [InboxController::class, 'assign']);
+    Route::put('/conversations/{conversation}/status', [InboxController::class, 'updateStatus']);
+
+    // AI suggestions
+    Route::post('/conversations/{conversation}/suggest-reply', [AgentAssistController::class, 'suggestReply']);
+
+    // Bot rules
+    Route::get('/workspaces/{workspace}/bot-rules', [\App\Http\Controllers\Api\BotRuleController::class, 'index']);
+    Route::post('/workspaces/{workspace}/bot-rules', [\App\Http\Controllers\Api\BotRuleController::class, 'store']);
+    Route::put('/workspaces/{workspace}/bot-rules/{rule}', [\App\Http\Controllers\Api\BotRuleController::class, 'update']);
+    Route::delete('/workspaces/{workspace}/bot-rules/{rule}', [\App\Http\Controllers\Api\BotRuleController::class, 'destroy']);
+    Route::post('/workspaces/{workspace}/bot-rules/reorder', [\App\Http\Controllers\Api\BotRuleController::class, 'reorder']);
 });
 
 // Incoming webhook — public but token-authenticated
 Route::post('/webhooks/incoming/{token}', [BotController::class, 'incoming']);
+
+// WhatsApp Cloud API webhooks — public, signature-verified
+Route::get('/webhooks/whatsapp/{accountId}', [WhatsAppWebhookController::class, 'verify']);
+Route::post('/webhooks/whatsapp/{accountId}', [WhatsAppWebhookController::class, 'receive']);

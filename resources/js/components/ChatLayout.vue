@@ -41,6 +41,22 @@
         </button>
       </div>
 
+      <!-- Inbox quick link -->
+      <div class="px-3 pb-1 flex-shrink-0">
+        <router-link
+          :to="`/w/${route.params.workspaceSlug}/inbox`"
+          :class="[
+            'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors w-full',
+            route.path.includes('/inbox') ? 'bg-brand-600/20 text-brand-400' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+          ]"
+        >
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+          </svg>
+          <span>Inbox</span>
+        </router-link>
+      </div>
+
       <!-- Channel list -->
       <RoomList
         class="flex-1 min-h-0"
@@ -148,7 +164,7 @@ const showSearch        = ref(false)
 const activeThread      = ref(null)
 
 const isSubPage = computed(() =>
-    route.path.includes('/files') || route.path.includes('/settings')
+    route.path.includes('/files') || route.path.includes('/settings') || route.path.includes('/inbox')
 )
 
 const currentStatusText = computed(() => {

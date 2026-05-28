@@ -25,6 +25,7 @@ const router = createRouter({
                 { path: 'dm/:userId', component: () => import('./components/ChatRoom.vue'), props: { isDm: true } },
                 { path: 'files', component: () => import('./components/FileManager.vue') },
                 { path: 'settings', component: () => import('./components/WorkspaceSettings.vue') },
+                { path: 'inbox', component: () => import('./components/AgentInbox.vue'), props: route => ({ workspaceSlug: route.params.workspaceSlug }) },
             ],
         },
     ],
