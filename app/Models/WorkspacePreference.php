@@ -5,6 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $notification_preference
+ * @property string $status
+ * @property string|null $status_emoji
+ * @property string|null $status_text
+ */
 class WorkspacePreference extends Model
 {
     protected $fillable = [

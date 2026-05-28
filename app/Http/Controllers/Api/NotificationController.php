@@ -35,7 +35,7 @@ class NotificationController extends Controller
         if ($id) {
             $request->user()->notifications()->where('id', $id)->update(['read_at' => now()]);
         } else {
-            $request->user()->unreadNotifications->markAsRead();
+            $request->user()->unreadNotifications()->update(['read_at' => now()]);
         }
 
         return response()->json(['message' => 'Marked as read']);

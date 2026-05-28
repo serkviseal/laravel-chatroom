@@ -8,7 +8,7 @@ use App\Models\Workspace;
 use App\Services\WhatsAppService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Str;
+use Illuminate\Support\Str;
 
 class WhatsAppAccountController extends Controller
 {

@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\Room;
 use App\Models\StoredFile;
 use App\Models\Workspace;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,7 @@ class SearchController extends Controller
         $results = [];
 
         if (! $type || $type === 'messages') {
+            /** @var Collection<int, Message> $messages */
             $messages = Message::search($q)
                 ->where('workspace_id', $workspace->id)
                 ->take(20)
@@ -38,15 +40,16 @@ class SearchController extends Controller
                     'type' => 'message',
                     'id' => $m->id,
                     'body' => $m->body,
-                    'channel' => $m->room?->name,
+                    'channel' => $m->room->name,
                     'channel_id' => $m->room_id,
-                    'user' => $m->user?->name,
+                    'user' => $m->user->name,
                     'created_at' => $m->created_at?->toISOString(),
                 ];
             }
         }
 
         if (! $type || $type === 'channels') {
+            /** @var Collection<int, Room> $channels */
             $channels = Room::search($q)
                 ->where('workspace_id', $workspace->id)
                 ->take(10)
@@ -64,6 +67,7 @@ class SearchController extends Controller
         }
 
         if (! $type || $type === 'files') {
+            /** @var Collection<int, StoredFile> $files */
             $files = StoredFile::search($q)
                 ->where('workspace_id', $workspace->id)
                 ->take(10)

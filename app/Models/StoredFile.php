@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property-read Workspace|null $workspace
+ * @property-read User|null $uploader
+ */
 class StoredFile extends Model
 {
     use HasFactory, Searchable, SoftDeletes;
@@ -90,14 +94,15 @@ class StoredFile extends Model
     public function shareLink(): array
     {
         $token = Str::random(32);
+        $expiresAt = now()->addDays(7);
         $this->update([
             'shared_token' => $token,
-            'shared_expires_at' => now()->addDays(7),
+            'shared_expires_at' => $expiresAt,
         ]);
 
         return [
             'url' => url("/files/shared/{$token}"),
-            'expires_at' => $this->shared_expires_at->toISOString(),
+            'expires_at' => $expiresAt->toISOString(),
         ];
     }
 

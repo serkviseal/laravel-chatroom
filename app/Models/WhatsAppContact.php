@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string|null $profile_name
+ * @property string $phone
+ */
 class WhatsAppContact extends Model
 {
     protected $table = 'whatsapp_contacts';

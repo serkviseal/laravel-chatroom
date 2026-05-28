@@ -36,7 +36,7 @@ class BotRule extends Model
             'regex' => (bool) @preg_match('/'.$this->trigger_value.'/i', $messageBody),
             'always' => true,
             'first_contact' => $conversation->first_reply_at === null,
-            'outside_hours' => ! $conversation->whatsappAccount->withinBusinessHours(),
+            'outside_hours' => ! ($conversation->whatsappAccount?->withinBusinessHours() ?? false),
             'unassigned_timeout' => $conversation->assigned_agent_id === null,
             default => false,
         };

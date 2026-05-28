@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/** @property-read Workspace $workspace */
 class Bot extends Model
 {
     use HasFactory;
@@ -44,6 +45,6 @@ class Bot extends Model
 
     public function allowsChannel(int $channelId): bool
     {
-        return $this->channel_ids === null || in_array($channelId, $this->channel_ids);
+        return empty($this->channel_ids) || in_array($channelId, (array) $this->channel_ids);
     }
 }

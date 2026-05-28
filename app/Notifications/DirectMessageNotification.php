@@ -25,14 +25,14 @@ class DirectMessageNotification extends Notification implements ShouldQueue
         return [
             'type' => 'direct_message',
             'dm_id' => $this->dm->id,
-            'sender_name' => $this->dm->sender?->name ?? 'Someone',
+            'sender_name' => $this->dm->sender->name,
             'preview' => mb_substr($this->dm->body ?? '', 0, 100),
         ];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        $sender = $this->dm->sender?->name ?? 'Someone';
+        $sender = $this->dm->sender->name;
 
         return (new MailMessage)
             ->subject("New message from {$sender}")

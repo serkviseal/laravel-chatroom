@@ -15,9 +15,9 @@ class WhatsAppService
 
     public function __construct(private WhatsAppAccount $account) {}
 
-    public static function for(WhatsAppAccount $account): static
+    public static function for(WhatsAppAccount $account): self
     {
-        return new static($account);
+        return new self($account);
     }
 
     public function isTwilio(): bool

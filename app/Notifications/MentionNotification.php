@@ -27,15 +27,15 @@ class MentionNotification extends Notification implements ShouldQueue
             'message_id' => $this->message->id,
             'channel_id' => $this->message->room_id,
             'workspace_id' => $this->message->workspace_id,
-            'sender_name' => $this->message->user?->name ?? 'Someone',
+            'sender_name' => $this->message->user->name,
             'preview' => mb_substr($this->message->body ?? '', 0, 100),
         ];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        $sender = $this->message->user?->name ?? 'Someone';
-        $channel = $this->message->room?->name ?? 'a channel';
+        $sender = $this->message->user->name;
+        $channel = $this->message->room->name;
 
         return (new MailMessage)
             ->subject("{$sender} mentioned you in #{$channel}")

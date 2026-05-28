@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\UserStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\WorkspacePreference;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -41,15 +42,14 @@ class UserController extends Controller
         ]);
 
         $user = $request->user();
-        $pref = $user->workspacePreferences()
-            ->updateOrCreate(
-                ['workspace_id' => $data['workspace_id']],
-                [
-                    'status' => $data['status'],
-                    'status_emoji' => $data['status_emoji'] ?? null,
-                    'status_text' => $data['status_text'] ?? null,
-                ]
-            );
+        $pref = WorkspacePreference::updateOrCreate(
+            ['user_id' => $user->id, 'workspace_id' => $data['workspace_id']],
+            [
+                'status' => $data['status'],
+                'status_emoji' => $data['status_emoji'] ?? null,
+                'status_text' => $data['status_text'] ?? null,
+            ]
+        );
 
         broadcast(new UserStatusChanged($user, $data))->toOthers();
 

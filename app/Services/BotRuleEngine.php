@@ -39,7 +39,12 @@ class BotRuleEngine
 
     public function executeAction(array $action, Message $message, WhatsAppConversation $conversation): void
     {
-        $waService = WhatsAppService::for($conversation->whatsappAccount);
+        $account = $conversation->whatsappAccount;
+        if (! $account) {
+            return;
+        }
+
+        $waService = WhatsAppService::for($account);
 
         match ($action['action_type']) {
             'reply' => $this->handleReply($action, $conversation, $waService),
@@ -48,7 +53,7 @@ class BotRuleEngine
             'assign_bot' => $this->handleAssignBot($action, $conversation),
             'close' => $conversation->update(['status' => 'resolved']),
             'add_label' => $this->handleAddLabel($action, $conversation),
-            'escalate_ai' => dispatch(new GenerateReplySuggestions($conversation, $message)),
+            'escalate_ai' => dispatch(new GenerateReplySuggestions($conversation)),
             default => null,
         };
     }
@@ -56,11 +61,12 @@ class BotRuleEngine
     private function handleReply(array $action, WhatsAppConversation $conversation, WhatsAppService $wa): void
     {
         $text = $action['action_value']['text'] ?? '';
-        if (! $text) {
+        $phone = $conversation->contact?->phone;
+        if (! $text || ! $phone) {
             return;
         }
 
-        $waMessageId = $wa->sendTextMessage($conversation->contact->phone, $text);
+        $waMessageId = $wa->sendTextMessage($phone, $text);
 
         Message::create([
             'room_id' => $conversation->room_id,
@@ -79,12 +85,13 @@ class BotRuleEngine
         $templateName = $action['action_value']['template_name'] ?? '';
         $language = $action['action_value']['language'] ?? 'en_US';
         $components = $action['action_value']['components'] ?? [];
+        $phone = $conversation->contact?->phone;
 
-        if (! $templateName) {
+        if (! $templateName || ! $phone) {
             return;
         }
 
-        $wa->sendTemplate($conversation->contact->phone, $templateName, $language, $components);
+        $wa->sendTemplate($phone, $templateName, $language, $components);
     }
 
     private function handleAssignAgent(array $action, WhatsAppConversation $conversation): void
@@ -104,8 +111,11 @@ class BotRuleEngine
         // Labels stored in contact metadata for now
         $label = $action['action_value']['label'] ?? '';
         $room = $conversation->room;
-        $metadata = $room->contact_metadata ?? [];
-        $labels = $metadata['labels'] ?? [];
+        if (! $room) {
+            return;
+        }
+        $metadata = is_array($room->contact_metadata) ? $room->contact_metadata : [];
+        $labels = is_array($metadata['labels'] ?? null) ? $metadata['labels'] : [];
 
         if ($label && ! in_array($label, $labels)) {
             $labels[] = $label;

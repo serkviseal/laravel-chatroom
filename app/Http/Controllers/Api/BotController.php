@@ -126,14 +126,14 @@ class BotController extends Controller
         try {
             Http::timeout(5)->post($bot->outgoing_webhook_url, [
                 'event' => 'message.created',
-                'channel' => ['id' => $message->room_id, 'name' => $message->room?->name],
+                'channel' => ['id' => $message->room_id, 'name' => $message->room->name],
                 'message' => [
                     'id' => $message->id,
                     'body' => $message->body,
-                    'sender' => $message->user?->name,
+                    'sender' => $message->user->name,
                     'created_at' => $message->created_at->toISOString(),
                 ],
-                'workspace' => ['id' => $message->room?->workspace_id],
+                'workspace' => ['id' => $message->room->workspace_id],
             ]);
         } catch (\Throwable $e) {
             Log::warning("Webhook delivery failed for bot {$bot->id}: {$e->getMessage()}");

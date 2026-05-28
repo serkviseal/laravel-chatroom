@@ -3,6 +3,7 @@
 use App\Providers\AppServiceProvider;
 use App\Providers\HorizonServiceProvider;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -173,7 +174,7 @@ return [
 
     'aliases' => [
 
-        'App' => Illuminate\Support\Facades\App::class,
+        'App' => App::class,
         'Artisan' => Artisan::class,
         'Auth' => Auth::class,
         'Blade' => Blade::class,

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Scout\Searchable;
 
+/** @property-read Workspace|null $workspace */
 class Room extends Model
 {
     use HasFactory, Searchable;
@@ -22,14 +23,16 @@ class Room extends Model
         'type',
         'is_archived',
         'topic',
+        'source',
+        'is_inbox_item',
+        'contact_metadata',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'is_archived' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'is_archived' => 'boolean',
+        'is_inbox_item' => 'boolean',
+        'contact_metadata' => 'array',
+    ];
 
     public function workspace(): BelongsTo
     {

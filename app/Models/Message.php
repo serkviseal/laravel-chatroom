@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property-read User $user
+ * @property-read Room $room
+ * @property-read Workspace|null $workspace
+ * @property-read Message|null $threadRoot
+ */
 class Message extends Model
 {
     use HasFactory, Searchable, SoftDeletes;
@@ -93,9 +99,9 @@ class Message extends Model
             ->groupBy('emoji')
             ->get()
             ->map(fn ($r) => [
-                'emoji' => $r->emoji,
-                'count' => $r->count,
-                'user_ids' => array_map('intval', explode(',', $r->user_ids)),
+                'emoji' => $r->getAttribute('emoji'),
+                'count' => $r->getAttribute('count'),
+                'user_ids' => array_map('intval', explode(',', (string) $r->getAttribute('user_ids'))),
             ])
             ->values()
             ->toArray();

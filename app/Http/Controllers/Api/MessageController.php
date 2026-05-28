@@ -24,7 +24,7 @@ class MessageController extends Controller
     public function index(Room $room): AnonymousResourceCollection
     {
         $messages = $room->messages()
-            ->threadRoots()
+            ->whereNull('thread_id')
             ->with('user', 'reactions')
             ->latest()
             ->paginate(50);

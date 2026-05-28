@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\WorkspaceResource;
+use App\Models\User;
 use App\Models\Workspace;
 use App\Services\WorkspaceStorageService;
 use Illuminate\Http\JsonResponse;
@@ -87,16 +88,22 @@ class WorkspaceController extends Controller
         return response()->json(['message' => 'Left workspace']);
     }
 
-    public function members(Workspace $workspace): AnonymousResourceCollection
+    public function members(Workspace $workspace): JsonResponse
     {
         $this->authorize('view', $workspace);
-        $members = $workspace->members()->get()->map(fn ($u) => [
-            'id' => $u->id,
-            'name' => $u->name,
-            'avatar_url' => $u->avatar_url,
-            'role' => $u->pivot->role,
-            'joined_at' => $u->pivot->joined_at,
-        ]);
+
+        $members = User::query()
+            ->join('workspace_user', 'users.id', '=', 'workspace_user.user_id')
+            ->where('workspace_user.workspace_id', $workspace->id)
+            ->select('users.*', 'workspace_user.role', 'workspace_user.joined_at')
+            ->get()
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'avatar_url' => $u->avatar_url,
+                'role' => $u->getAttribute('role'),
+                'joined_at' => $u->getAttribute('joined_at'),
+            ]);
 
         return response()->json(['data' => $members]);
     }

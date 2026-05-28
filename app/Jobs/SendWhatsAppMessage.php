@@ -41,9 +41,16 @@ class SendWhatsAppMessage implements ShouldQueue
             return;
         }
 
-        $wa = WhatsAppService::for($conversation->whatsappAccount);
+        $account = $conversation->whatsappAccount;
+        $contact = $conversation->contact;
 
-        $waMessageId = $wa->sendTextMessage($conversation->contact->phone, $message->body);
+        if (! $account || ! $contact) {
+            return;
+        }
+
+        $wa = WhatsAppService::for($account);
+
+        $waMessageId = $wa->sendTextMessage($contact->phone, $message->body);
 
         if ($waMessageId) {
             $message->update([

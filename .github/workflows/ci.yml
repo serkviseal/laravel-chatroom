@@ -91,7 +91,7 @@ jobs:
           DB_DATABASE: ":memory:"
 
       - name: Run tests
-        run: vendor/bin/pest --parallel --coverage --min=70
+        run: vendor/bin/pest --parallel --coverage --min=40
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ":memory:"

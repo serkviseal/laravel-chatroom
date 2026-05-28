@@ -9,7 +9,9 @@ class FilePolicy
 {
     public function view(User $user, StoredFile $file): bool
     {
-        return $file->workspace->hasMember($user);
+        $workspace = $file->workspace;
+
+        return $workspace !== null && $workspace->hasMember($user);
     }
 
     public function delete(User $user, StoredFile $file): bool
@@ -18,6 +20,8 @@ class FilePolicy
             return true;
         }
 
-        return in_array($user->roleIn($file->workspace), ['owner', 'admin']);
+        $workspace = $file->workspace;
+
+        return $workspace !== null && in_array($user->roleIn($workspace), ['owner', 'admin']);
     }
 }

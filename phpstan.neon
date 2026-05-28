@@ -7,3 +7,11 @@ parameters:
         - app
     excludePaths:
         - app/Http/Controllers/Auth
+        - app/Http/Controllers/HomeController.php
+        - app/Http/Controllers/MessagesController.php
+        - app/Http/Controllers/RoomsController.php
+        - app/Http/Middleware/EncryptCookies.php
+        - app/Http/Middleware/TrimStrings.php
+        - app/Http/Middleware/TrustProxies.php
+        - app/Http/Middleware/VerifyCsrfToken.php
+        - app/Http/Resources

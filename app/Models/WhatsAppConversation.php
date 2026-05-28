@@ -5,6 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read Workspace|null $workspace
+ * @property-read WhatsAppAccount|null $whatsappAccount
+ * @property-read WhatsAppContact|null $contact
+ * @property-read Room|null $room
+ * @property-read User|null $assignedAgent
+ * @property-read Bot|null $assignedBot
+ */
 class WhatsAppConversation extends Model
 {
     protected $table = 'whatsapp_conversations';

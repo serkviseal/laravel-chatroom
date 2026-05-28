@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\AiSuggestionsReady;
 use App\Models\Message;
 use App\Models\WhatsAppConversation;
+use App\Models\Workspace;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +24,6 @@ class GenerateReplySuggestions implements ShouldQueue
 
     public function __construct(
         private WhatsAppConversation $conversation,
-        private Message $message
     ) {}
 
     public function handle(): void
@@ -45,7 +45,7 @@ class GenerateReplySuggestions implements ShouldQueue
             ->values()
             ->toArray();
 
-        $workspace = $this->conversation->workspace;
+        $workspace = $this->conversation->workspace ?? new Workspace;
 
         $response = Http::withHeaders([
             'x-api-key' => $apiKey,
