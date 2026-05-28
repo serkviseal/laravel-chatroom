@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Room;
 use App\Events\RoomJoined;
+use App\Room;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class RoomsController extends Controller
@@ -12,7 +13,7 @@ class RoomsController extends Controller
     /**
      * Display a listing of the chat rooms.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -24,7 +25,7 @@ class RoomsController extends Controller
     /**
      * Show the form for creating a chat room.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -36,19 +37,18 @@ class RoomsController extends Controller
     /**
      * Store a newly created room in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required'
+            'name' => 'required',
         ]);
-        
+
         try {
             $room = Room::create([
                 'name' => $request->get('name'),
-                'description' => $request->get('description')
+                'description' => $request->get('description'),
             ]);
 
             $request->user()->addRoom($room);
@@ -62,28 +62,25 @@ class RoomsController extends Controller
             return back()->withInput();
         }
 
-        return redirect()->route('rooms.index');  
+        return redirect()->route('rooms.index');
     }
 
     /**
      * Show room with messages
-     * 
-     * @param mixed $room
+     *
+     * @param  mixed  $room
      */
     public function show(Room $room)
     {
         $room = $room->load('messages');
-        
+
         return view('rooms.show', compact('room'));
     }
 
     /**
      * Allow user to join chat room
-     * 
-     * @param Room $room
-     * @param \Illuminate\Http\Request $request
      */
-    public function join(Room $room, Request $request) 
+    public function join(Room $room, Request $request)
     {
         try {
             $room->join($request->user());

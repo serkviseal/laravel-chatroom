@@ -24,10 +24,10 @@ class EvaluateBotRules implements ShouldQueue
 
     public function handle(BotRuleEngine $engine): void
     {
-        $message      = Message::find($this->messageId);
+        $message = Message::find($this->messageId);
         $conversation = WhatsAppConversation::with(['contact', 'whatsappAccount', 'room'])->find($this->conversationId);
 
-        if (!$message || !$conversation) {
+        if (! $message || ! $conversation) {
             return;
         }
 

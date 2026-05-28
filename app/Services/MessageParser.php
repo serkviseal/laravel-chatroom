@@ -35,6 +35,7 @@ class MessageParser
     public function extractMentions(string $body): array
     {
         preg_match_all('/@([a-zA-Z0-9_]+)/', $body, $matches);
+
         return array_unique($matches[1]);
     }
 
@@ -42,6 +43,7 @@ class MessageParser
     public function extractChannelRefs(string $body): array
     {
         preg_match_all('/#([a-zA-Z0-9_-]+)/', $body, $matches);
+
         return array_unique($matches[1]);
     }
 }

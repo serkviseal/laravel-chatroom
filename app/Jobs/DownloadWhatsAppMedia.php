@@ -17,24 +17,25 @@ class DownloadWhatsAppMedia implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 10;
 
     public function __construct(
-        private int    $accountId,
+        private int $accountId,
         private string $mediaId,
-        private int    $conversationId
+        private int $conversationId
     ) {}
 
     public function handle(): void
     {
-        $account      = WhatsAppAccount::find($this->accountId);
+        $account = WhatsAppAccount::find($this->accountId);
         $conversation = WhatsAppConversation::find($this->conversationId);
 
-        if (!$account || !$conversation) {
+        if (! $account || ! $conversation) {
             return;
         }
 
-        $wa   = WhatsAppService::for($account);
+        $wa = WhatsAppService::for($account);
         $path = $wa->downloadMedia($this->mediaId);
 
         if ($path) {

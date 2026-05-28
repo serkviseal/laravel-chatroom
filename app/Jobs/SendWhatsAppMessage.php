@@ -17,6 +17,7 @@ class SendWhatsAppMessage implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 6; // Meta 1 msg/6s per conversation
 
     public function __construct(
@@ -26,16 +27,17 @@ class SendWhatsAppMessage implements ShouldQueue
 
     public function handle(): void
     {
-        $message      = Message::find($this->messageId);
+        $message = Message::find($this->messageId);
         $conversation = WhatsAppConversation::with(['contact', 'whatsappAccount'])->find($this->conversationId);
 
-        if (!$message || !$conversation) {
+        if (! $message || ! $conversation) {
             return;
         }
 
-        if (!$conversation->isWithinWindow()) {
+        if (! $conversation->isWithinWindow()) {
             Log::info('WA window expired, skipping free-form send', ['conversation' => $this->conversationId]);
             $message->update(['delivery_status' => 'failed']);
+
             return;
         }
 
@@ -45,11 +47,11 @@ class SendWhatsAppMessage implements ShouldQueue
 
         if ($waMessageId) {
             $message->update([
-                'wa_message_id'   => $waMessageId,
+                'wa_message_id' => $waMessageId,
                 'delivery_status' => 'sent',
             ]);
 
-            if (!$conversation->first_reply_at) {
+            if (! $conversation->first_reply_at) {
                 $conversation->update(['first_reply_at' => now()]);
             }
         } else {

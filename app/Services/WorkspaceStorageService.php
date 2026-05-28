@@ -30,6 +30,7 @@ class WorkspaceStorageService
         if ($quota === 0) {
             return 0;
         }
+
         return round($this->usedBytes($workspace) / $quota * 100, 1);
     }
 }

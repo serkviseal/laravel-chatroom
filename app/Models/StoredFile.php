@@ -65,8 +65,10 @@ class StoredFile extends Model
         $disk = config('filesystems.default');
         if ($disk === 'spaces' || $disk === 's3') {
             $cdnUrl = config('filesystems.disks.spaces.url', config('filesystems.disks.s3.url'));
+
             return $cdnUrl ? $cdnUrl.'/'.$this->disk_path : Storage::disk($disk)->url($this->disk_path);
         }
+
         return Storage::disk($disk)->url($this->disk_path);
     }
 
@@ -78,8 +80,10 @@ class StoredFile extends Model
         $disk = config('filesystems.default');
         if ($disk === 'spaces' || $disk === 's3') {
             $cdnUrl = config('filesystems.disks.spaces.url', config('filesystems.disks.s3.url'));
+
             return $cdnUrl ? $cdnUrl.'/'.$this->thumbnail_path : Storage::disk($disk)->url($this->thumbnail_path);
         }
+
         return Storage::disk($disk)->url($this->thumbnail_path);
     }
 
@@ -90,6 +94,7 @@ class StoredFile extends Model
             'shared_token' => $token,
             'shared_expires_at' => now()->addDays(7),
         ]);
+
         return [
             'url' => url("/files/shared/{$token}"),
             'expires_at' => $this->shared_expires_at->toISOString(),
@@ -110,6 +115,7 @@ class StoredFile extends Model
         if ($bytes >= 1048576) {
             return round($bytes / 1048576, 1).' MB';
         }
+
         return round($bytes / 1024, 1).' KB';
     }
 

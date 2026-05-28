@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Workspace;
 use App\Models\WhatsAppConversation;
+use App\Models\Workspace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -42,12 +42,12 @@ class InboxController extends Controller
 
         $data = $request->validate([
             'agent_id' => 'nullable|exists:users,id',
-            'bot_id'   => 'nullable|exists:bots,id',
+            'bot_id' => 'nullable|exists:bots,id',
         ]);
 
         $conversation->update([
             'assigned_agent_id' => $data['agent_id'] ?? null,
-            'assigned_bot_id'   => $data['bot_id'] ?? null,
+            'assigned_bot_id' => $data['bot_id'] ?? null,
         ]);
 
         return response()->json($conversation->load(['assignedAgent', 'assignedBot']));
@@ -58,7 +58,7 @@ class InboxController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'status'        => 'required|in:open,pending,snoozed,resolved,spam',
+            'status' => 'required|in:open,pending,snoozed,resolved,spam',
             'snoozed_until' => 'required_if:status,snoozed|nullable|date',
         ]);
 

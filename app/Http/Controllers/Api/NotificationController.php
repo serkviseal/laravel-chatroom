@@ -37,6 +37,7 @@ class NotificationController extends Controller
         } else {
             $request->user()->unreadNotifications->markAsRead();
         }
+
         return response()->json(['message' => 'Marked as read']);
     }
 }

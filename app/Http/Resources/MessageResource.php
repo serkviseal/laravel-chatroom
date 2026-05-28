@@ -38,6 +38,7 @@ class MessageResource extends JsonResource
             return null;
         }
         $key = "msg_html_{$this->id}_".($this->updated_at?->timestamp ?? 0);
+
         return Cache::remember($key, 3600, function () {
             return app(MessageParser::class)->toHtml($this->body);
         });

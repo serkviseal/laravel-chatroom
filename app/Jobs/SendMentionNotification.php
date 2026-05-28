@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Workspace;
 use App\Notifications\MentionNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -27,7 +28,7 @@ class SendMentionNotification implements ShouldQueue
             return;
         }
 
-        $pref = $user->preferenceIn($this->message->workspace ?? new \App\Models\Workspace);
+        $pref = $user->preferenceIn($this->message->workspace ?? new Workspace);
         if ($pref->notification_preference === 'nothing') {
             return;
         }

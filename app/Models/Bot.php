@@ -21,9 +21,9 @@ class Bot extends Model
     {
         return [
             'subscribed_events' => 'array',
-            'channel_ids'       => 'array',
-            'provider_config'   => 'array',
-            'is_active'         => 'boolean',
+            'channel_ids' => 'array',
+            'provider_config' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 

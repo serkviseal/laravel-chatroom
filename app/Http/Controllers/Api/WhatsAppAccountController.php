@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Workspace;
 use App\Models\WhatsAppAccount;
+use App\Models\Workspace;
 use App\Services\WhatsAppService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,29 +26,29 @@ class WhatsAppAccountController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'display_name'    => 'required|string|max:100',
-            'provider'        => 'nullable|in:meta,twilio',
+            'display_name' => 'required|string|max:100',
+            'provider' => 'nullable|in:meta,twilio',
             // Meta fields
             'phone_number_id' => 'nullable|string',
-            'waba_id'         => 'nullable|string',
+            'waba_id' => 'nullable|string',
             // Twilio fields
-            'account_sid'     => 'nullable|string',
-            'from_number'     => 'nullable|string',
+            'account_sid' => 'nullable|string',
+            'from_number' => 'nullable|string',
             // Shared
-            'access_token'    => 'required|string',
-            'webhook_secret'  => 'nullable|string',
-            'business_hours'  => 'nullable|array',
+            'access_token' => 'required|string',
+            'webhook_secret' => 'nullable|string',
+            'business_hours' => 'nullable|array',
             'welcome_template' => 'nullable|string',
         ]);
 
         $data['workspace_id'] = $workspace->id;
         $data['verify_token'] = Str::random(32);
-        $data['is_active']    = true;
+        $data['is_active'] = true;
 
         $account = WhatsAppAccount::create($data);
 
         return response()->json([
-            'account'     => $account->makeVisible(['access_token']),
+            'account' => $account->makeVisible(['access_token']),
             'webhook_url' => url("/api/webhooks/whatsapp/{$account->id}"),
             'verify_token' => $account->verify_token,
         ], 201);
@@ -59,12 +59,12 @@ class WhatsAppAccountController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'display_name'     => 'sometimes|string|max:100',
-            'access_token'     => 'sometimes|string',
-            'webhook_secret'   => 'nullable|string',
-            'business_hours'   => 'nullable|array',
+            'display_name' => 'sometimes|string|max:100',
+            'access_token' => 'sometimes|string',
+            'webhook_secret' => 'nullable|string',
+            'business_hours' => 'nullable|array',
             'welcome_template' => 'nullable|string',
-            'is_active'        => 'sometimes|boolean',
+            'is_active' => 'sometimes|boolean',
         ]);
 
         $account->update($data);
@@ -90,7 +90,7 @@ class WhatsAppAccountController extends Controller
         $messageId = $waService->sendTextMessage($testPhone, '✅ WhatsApp integration test successful!');
 
         return response()->json([
-            'success'    => (bool) $messageId,
+            'success' => (bool) $messageId,
             'message_id' => $messageId,
         ]);
     }

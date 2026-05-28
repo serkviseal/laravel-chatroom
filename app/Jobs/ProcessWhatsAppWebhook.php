@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\MessageCreated;
 use App\Models\Message;
 use App\Models\Room;
 use App\Models\WhatsAppAccount;
@@ -20,22 +21,23 @@ class ProcessWhatsAppWebhook implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 5;
 
     public function __construct(
-        private int   $accountId,
+        private int $accountId,
         private array $payload
     ) {}
 
     public function handle(BotRuleEngine $engine): void
     {
         $account = WhatsAppAccount::find($this->accountId);
-        if (!$account) {
+        if (! $account) {
             return;
         }
 
         $entry = $this->payload['entry'][0] ?? null;
-        if (!$entry) {
+        if (! $entry) {
             return;
         }
 
@@ -52,7 +54,7 @@ class ProcessWhatsAppWebhook implements ShouldQueue
         $profileMap = collect($contacts)->keyBy('wa_id');
 
         foreach ($messages as $msg) {
-            $waId    = $msg['from'];
+            $waId = $msg['from'];
             $profile = $profileMap[$waId] ?? [];
 
             $contact = WhatsAppContact::firstOrCreate(
@@ -77,16 +79,16 @@ class ProcessWhatsAppWebhook implements ShouldQueue
             }
 
             $message = Message::create([
-                'room_id'         => $conversation->room_id,
-                'user_id'         => null,
-                'body'            => $body ?? '[media]',
-                'origin'          => 'whatsapp',
-                'wa_message_id'   => $msg['id'],
+                'room_id' => $conversation->room_id,
+                'user_id' => null,
+                'body' => $body ?? '[media]',
+                'origin' => 'whatsapp',
+                'wa_message_id' => $msg['id'],
                 'delivery_status' => 'delivered',
             ]);
 
             try {
-                event(new \App\Events\MessageCreated($message));
+                event(new MessageCreated($message));
             } catch (\Throwable $e) {
                 Log::warning('Broadcast failed for WA message', ['error' => $e->getMessage()]);
             }
@@ -115,40 +117,40 @@ class ProcessWhatsAppWebhook implements ShouldQueue
         }
 
         $room = Room::create([
-            'workspace_id'     => $account->workspace_id,
-            'name'             => $contact->display_name,
-            'type'             => 'direct',
-            'source'           => 'whatsapp',
-            'is_inbox_item'    => true,
+            'workspace_id' => $account->workspace_id,
+            'name' => $contact->display_name,
+            'type' => 'direct',
+            'source' => 'whatsapp',
+            'is_inbox_item' => true,
             'contact_metadata' => [
-                'phone'    => $contact->phone,
-                'name'     => $contact->display_name,
-                'wa_id'    => $contact->phone,
-                'labels'   => [],
+                'phone' => $contact->phone,
+                'name' => $contact->display_name,
+                'wa_id' => $contact->phone,
+                'labels' => [],
             ],
         ]);
 
         return WhatsAppConversation::create([
-            'workspace_id'         => $account->workspace_id,
-            'whatsapp_account_id'  => $account->id,
-            'contact_id'           => $contact->id,
-            'room_id'              => $room->id,
-            'status'               => 'open',
-            'conversation_type'    => 'contact',
-            'window_expires_at'    => now()->addHours(24),
+            'workspace_id' => $account->workspace_id,
+            'whatsapp_account_id' => $account->id,
+            'contact_id' => $contact->id,
+            'room_id' => $room->id,
+            'status' => 'open',
+            'conversation_type' => 'contact',
+            'window_expires_at' => now()->addHours(24),
         ]);
     }
 
     private function extractBody(array $msg): ?string
     {
         return match ($msg['type'] ?? '') {
-            'text'     => $msg['text']['body'] ?? null,
-            'image'    => $msg['image']['caption'] ?? null,
-            'video'    => $msg['video']['caption'] ?? null,
+            'text' => $msg['text']['body'] ?? null,
+            'image' => $msg['image']['caption'] ?? null,
+            'video' => $msg['video']['caption'] ?? null,
             'document' => $msg['document']['filename'] ?? '[document]',
-            'audio'    => '[voice message]',
+            'audio' => '[voice message]',
             'location' => sprintf('[location: %s, %s]', $msg['location']['latitude'] ?? '', $msg['location']['longitude'] ?? ''),
-            default    => null,
+            default => null,
         };
     }
 }

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WhatsAppContact extends Model
 {
+    protected $table = 'whatsapp_contacts';
+
     protected $fillable = [
         'workspace_id', 'whatsapp_account_id', 'phone', 'display_name',
         'profile_name', 'avatar_url', 'locale', 'last_seen_at',
@@ -15,10 +17,10 @@ class WhatsAppContact extends Model
     ];
 
     protected $casts = [
-        'meta'        => 'array',
+        'meta' => 'array',
         'last_seen_at' => 'datetime',
-        'opt_in_at'   => 'datetime',
-        'opt_out_at'  => 'datetime',
+        'opt_in_at' => 'datetime',
+        'opt_out_at' => 'datetime',
     ];
 
     public function workspace(): BelongsTo

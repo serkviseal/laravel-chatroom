@@ -17,6 +17,7 @@ class FilePolicy
         if ($file->uploader_id === $user->id) {
             return true;
         }
+
         return in_array($user->roleIn($file->workspace), ['owner', 'admin']);
     }
 }

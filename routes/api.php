@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AgentAssistController;
 use App\Http\Controllers\Api\BotController;
+use App\Http\Controllers\Api\BotRuleController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InboxController;
@@ -95,11 +96,11 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/conversations/{conversation}/suggest-reply', [AgentAssistController::class, 'suggestReply']);
 
     // Bot rules
-    Route::get('/workspaces/{workspace}/bot-rules', [\App\Http\Controllers\Api\BotRuleController::class, 'index']);
-    Route::post('/workspaces/{workspace}/bot-rules', [\App\Http\Controllers\Api\BotRuleController::class, 'store']);
-    Route::put('/workspaces/{workspace}/bot-rules/{rule}', [\App\Http\Controllers\Api\BotRuleController::class, 'update']);
-    Route::delete('/workspaces/{workspace}/bot-rules/{rule}', [\App\Http\Controllers\Api\BotRuleController::class, 'destroy']);
-    Route::post('/workspaces/{workspace}/bot-rules/reorder', [\App\Http\Controllers\Api\BotRuleController::class, 'reorder']);
+    Route::get('/workspaces/{workspace}/bot-rules', [BotRuleController::class, 'index']);
+    Route::post('/workspaces/{workspace}/bot-rules', [BotRuleController::class, 'store']);
+    Route::put('/workspaces/{workspace}/bot-rules/{rule}', [BotRuleController::class, 'update']);
+    Route::delete('/workspaces/{workspace}/bot-rules/{rule}', [BotRuleController::class, 'destroy']);
+    Route::post('/workspaces/{workspace}/bot-rules/reorder', [BotRuleController::class, 'reorder']);
 });
 
 // Incoming webhook — public but token-authenticated

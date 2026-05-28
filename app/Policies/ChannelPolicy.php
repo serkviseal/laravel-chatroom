@@ -19,6 +19,7 @@ class ChannelPolicy
         if ($room->type === 'private') {
             return $user->hasJoined($room->id);
         }
+
         return true;
     }
 
@@ -32,6 +33,7 @@ class ChannelPolicy
         if ($room->workspace_id === null) {
             return false;
         }
+
         return in_array($user->roleIn($room->workspace), ['owner', 'admin']);
     }
 
@@ -40,6 +42,7 @@ class ChannelPolicy
         if ($room->workspace_id === null) {
             return false;
         }
+
         return in_array($user->roleIn($room->workspace), ['owner', 'admin']);
     }
 }

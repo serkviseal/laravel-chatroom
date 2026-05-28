@@ -13,7 +13,7 @@ class AiSuggestionsReady implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public int   $conversationId,
+        public int $conversationId,
         public array $suggestions
     ) {}
 

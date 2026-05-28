@@ -96,7 +96,6 @@ test('joining a room dispatches RoomJoined event', function () {
 
     $this->actingAs($user)->postJson("/api/v1/rooms/{$room->id}/join");
 
-    Event::assertDispatched(RoomJoined::class, fn ($e) =>
-        $e->user->id === $user->id && $e->room->id === $room->id
+    Event::assertDispatched(RoomJoined::class, fn ($e) => $e->user->id === $user->id && $e->room->id === $room->id
     );
 });

@@ -13,10 +13,10 @@ class BotRule extends Model
     ];
 
     protected $casts = [
-        'action_value'  => 'array',
-        'is_active'     => 'boolean',
+        'action_value' => 'array',
+        'is_active' => 'boolean',
         'stop_on_match' => 'boolean',
-        'priority'      => 'integer',
+        'priority' => 'integer',
     ];
 
     public function workspace(): BelongsTo
@@ -32,13 +32,13 @@ class BotRule extends Model
     public function matches(string $messageBody, WhatsAppConversation $conversation): bool
     {
         return match ($this->trigger_type) {
-            'keyword'  => str_contains(strtolower($messageBody), strtolower($this->trigger_value ?? '')),
-            'regex'    => (bool) @preg_match('/' . $this->trigger_value . '/i', $messageBody),
-            'always'   => true,
+            'keyword' => str_contains(strtolower($messageBody), strtolower($this->trigger_value ?? '')),
+            'regex' => (bool) @preg_match('/'.$this->trigger_value.'/i', $messageBody),
+            'always' => true,
             'first_contact' => $conversation->first_reply_at === null,
-            'outside_hours' => !$conversation->whatsappAccount->withinBusinessHours(),
+            'outside_hours' => ! $conversation->whatsappAccount->withinBusinessHours(),
             'unassigned_timeout' => $conversation->assigned_agent_id === null,
-            default    => false,
+            default => false,
         };
     }
 }

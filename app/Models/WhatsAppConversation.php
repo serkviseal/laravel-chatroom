@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WhatsAppConversation extends Model
 {
+    protected $table = 'whatsapp_conversations';
+
     protected $fillable = [
         'workspace_id', 'whatsapp_account_id', 'contact_id', 'room_id',
         'wa_conversation_id', 'status', 'conversation_type',
@@ -16,9 +18,9 @@ class WhatsAppConversation extends Model
 
     protected $casts = [
         'window_expires_at' => 'datetime',
-        'first_reply_at'    => 'datetime',
-        'resolved_at'       => 'datetime',
-        'snoozed_until'     => 'datetime',
+        'first_reply_at' => 'datetime',
+        'resolved_at' => 'datetime',
+        'snoozed_until' => 'datetime',
     ];
 
     public function workspace(): BelongsTo
@@ -63,7 +65,7 @@ class WhatsAppConversation extends Model
 
     public function windowSecondsRemaining(): int
     {
-        if (!$this->window_expires_at || $this->window_expires_at->isPast()) {
+        if (! $this->window_expires_at || $this->window_expires_at->isPast()) {
             return 0;
         }
 

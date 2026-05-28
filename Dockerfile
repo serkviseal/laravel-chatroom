@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# ─── Base: PHP 8.3-fpm with extensions ───────────────────────────────────────
-FROM php:8.3-fpm-alpine AS base
+# ─── Base: PHP 8.4-fpm with extensions ───────────────────────────────────────
+FROM php:8.4-fpm-alpine AS base
 
 RUN apk add --no-cache \
     bash curl git unzip libpng-dev libzip-dev oniguruma-dev \

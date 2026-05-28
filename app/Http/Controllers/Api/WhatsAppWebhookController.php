@@ -15,9 +15,9 @@ class WhatsAppWebhookController extends Controller
     {
         $account = WhatsAppAccount::findOrFail($accountId);
 
-        $mode      = $request->query('hub_mode');
+        $mode = $request->query('hub_mode');
         $challenge = $request->query('hub_challenge');
-        $token     = $request->query('hub_verify_token');
+        $token = $request->query('hub_verify_token');
 
         if ($mode === 'subscribe' && $token === $account->verify_token) {
             return response($challenge, 200);
@@ -31,7 +31,7 @@ class WhatsAppWebhookController extends Controller
     {
         $account = WhatsAppAccount::find($accountId);
 
-        if (!$account) {
+        if (! $account) {
             return response('Not Found', 404);
         }
 
@@ -40,12 +40,12 @@ class WhatsAppWebhookController extends Controller
         // Signature verification
         if ($isTwilio) {
             $signature = $request->header('X-Twilio-Signature', '');
-            if ($account->webhook_secret && !$this->verifyTwilioSignature($request, $signature, $account->webhook_secret)) {
+            if ($account->webhook_secret && ! $this->verifyTwilioSignature($request, $signature, $account->webhook_secret)) {
                 return response('Forbidden', 403);
             }
         } else {
             $signature = $request->header('X-Hub-Signature-256', '');
-            if ($account->webhook_secret && !$this->verifyMetaSignature($request->getContent(), $signature, $account->webhook_secret)) {
+            if ($account->webhook_secret && ! $this->verifyMetaSignature($request->getContent(), $signature, $account->webhook_secret)) {
                 return response('Forbidden', 403);
             }
         }
@@ -74,15 +74,15 @@ class WhatsAppWebhookController extends Controller
         $type = $request->input('SmsStatus') ?? null;
 
         // Status callback (sent/delivered/read/failed)
-        if ($type && !$request->has('Body')) {
+        if ($type && ! $request->has('Body')) {
             return [
                 '_provider' => 'twilio',
-                '_type'     => 'status',
-                'entry'     => [[
+                '_type' => 'status',
+                'entry' => [[
                     'changes' => [[
                         'value' => [
                             'statuses' => [[
-                                'id'     => $request->input('MessageSid'),
+                                'id' => $request->input('MessageSid'),
                                 'status' => $this->mapTwilioStatus($type),
                             ]],
                         ],
@@ -96,29 +96,29 @@ class WhatsAppWebhookController extends Controller
         $from = ltrim($request->input('From', ''), 'whatsapp:');
         $body = $request->input('Body', '');
 
-        if (!$from) {
+        if (! $from) {
             return null;
         }
 
         return [
             '_provider' => 'twilio',
-            '_type'     => 'message',
-            'entry'     => [[
+            '_type' => 'message',
+            'entry' => [[
                 'changes' => [[
                     'value' => [
                         'messaging_product' => 'whatsapp',
-                        'contacts'          => [[
+                        'contacts' => [[
                             'profile' => ['name' => $request->input('ProfileName', $from)],
-                            'wa_id'   => $from,
+                            'wa_id' => $from,
                         ]],
                         'messages' => [[
-                            'from'      => $from,
-                            'id'        => $request->input('MessageSid', 'twilio-' . uniqid()),
+                            'from' => $from,
+                            'id' => $request->input('MessageSid', 'twilio-'.uniqid()),
                             'timestamp' => (string) now()->timestamp,
-                            'type'      => $request->has('NumMedia') && (int) $request->input('NumMedia') > 0 ? 'image' : 'text',
-                            'text'      => ['body' => $body],
+                            'type' => $request->has('NumMedia') && (int) $request->input('NumMedia') > 0 ? 'image' : 'text',
+                            'text' => ['body' => $body],
                             // Include media URL if present
-                            'image'     => $request->input('MediaUrl0') ? ['link' => $request->input('MediaUrl0'), 'caption' => $body] : null,
+                            'image' => $request->input('MediaUrl0') ? ['link' => $request->input('MediaUrl0'), 'caption' => $body] : null,
                         ]],
                     ],
                     'field' => 'messages',
@@ -130,11 +130,11 @@ class WhatsAppWebhookController extends Controller
     private function mapTwilioStatus(string $status): string
     {
         return match (strtolower($status)) {
-            'sent'      => 'sent',
+            'sent' => 'sent',
             'delivered' => 'delivered',
-            'read'      => 'read',
+            'read' => 'read',
             'failed', 'undelivered' => 'failed',
-            default     => 'sent',
+            default => 'sent',
         };
     }
 
@@ -142,17 +142,18 @@ class WhatsAppWebhookController extends Controller
 
     private function verifyMetaSignature(string $payload, string $signature, string $secret): bool
     {
-        $expected = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        $expected = 'sha256='.hash_hmac('sha256', $payload, $secret);
+
         return hash_equals($expected, $signature);
     }
 
     private function verifyTwilioSignature(Request $request, string $signature, string $authToken): bool
     {
-        $url    = $request->fullUrl();
+        $url = $request->fullUrl();
         $params = $request->post();
         ksort($params);
 
-        $data     = $url . implode('', array_map(fn ($k, $v) => $k . $v, array_keys($params), $params));
+        $data = $url.implode('', array_map(fn ($k, $v) => $k.$v, array_keys($params), $params));
         $expected = base64_encode(hash_hmac('sha1', $data, $authToken, true));
 
         return hash_equals($expected, $signature);

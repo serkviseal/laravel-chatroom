@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\GenerateReplySuggestions;
 use App\Models\BotRule;
 use App\Models\Message;
 use App\Models\WhatsAppConversation;
@@ -16,13 +17,13 @@ class BotRuleEngine
             ->get();
 
         foreach ($rules as $rule) {
-            if (!$rule->matches($message->body ?? '', $conversation)) {
+            if (! $rule->matches($message->body ?? '', $conversation)) {
                 continue;
             }
 
             $action = [
-                'rule'         => $rule,
-                'action_type'  => $rule->action_type,
+                'rule' => $rule,
+                'action_type' => $rule->action_type,
                 'action_value' => $rule->action_value ?? [],
             ];
 
@@ -43,30 +44,30 @@ class BotRuleEngine
         match ($action['action_type']) {
             'reply' => $this->handleReply($action, $conversation, $waService),
             'send_template' => $this->handleTemplate($action, $conversation, $waService),
-            'assign_agent'  => $this->handleAssignAgent($action, $conversation),
-            'assign_bot'    => $this->handleAssignBot($action, $conversation),
-            'close'         => $conversation->update(['status' => 'resolved']),
-            'add_label'     => $this->handleAddLabel($action, $conversation),
-            'escalate_ai'   => dispatch(new \App\Jobs\GenerateReplySuggestions($conversation, $message)),
-            default         => null,
+            'assign_agent' => $this->handleAssignAgent($action, $conversation),
+            'assign_bot' => $this->handleAssignBot($action, $conversation),
+            'close' => $conversation->update(['status' => 'resolved']),
+            'add_label' => $this->handleAddLabel($action, $conversation),
+            'escalate_ai' => dispatch(new GenerateReplySuggestions($conversation, $message)),
+            default => null,
         };
     }
 
     private function handleReply(array $action, WhatsAppConversation $conversation, WhatsAppService $wa): void
     {
         $text = $action['action_value']['text'] ?? '';
-        if (!$text) {
+        if (! $text) {
             return;
         }
 
         $waMessageId = $wa->sendTextMessage($conversation->contact->phone, $text);
 
-        \App\Models\Message::create([
-            'room_id'         => $conversation->room_id,
-            'user_id'         => null,
-            'body'            => $text,
-            'origin'          => 'internal',
-            'wa_message_id'   => $waMessageId,
+        Message::create([
+            'room_id' => $conversation->room_id,
+            'user_id' => null,
+            'body' => $text,
+            'origin' => 'internal',
+            'wa_message_id' => $waMessageId,
             'delivery_status' => 'sent',
         ]);
 
@@ -76,10 +77,10 @@ class BotRuleEngine
     private function handleTemplate(array $action, WhatsAppConversation $conversation, WhatsAppService $wa): void
     {
         $templateName = $action['action_value']['template_name'] ?? '';
-        $language     = $action['action_value']['language'] ?? 'en_US';
-        $components   = $action['action_value']['components'] ?? [];
+        $language = $action['action_value']['language'] ?? 'en_US';
+        $components = $action['action_value']['components'] ?? [];
 
-        if (!$templateName) {
+        if (! $templateName) {
             return;
         }
 
@@ -101,12 +102,12 @@ class BotRuleEngine
     private function handleAddLabel(array $action, WhatsAppConversation $conversation): void
     {
         // Labels stored in contact metadata for now
-        $label    = $action['action_value']['label'] ?? '';
-        $room     = $conversation->room;
+        $label = $action['action_value']['label'] ?? '';
+        $room = $conversation->room;
         $metadata = $room->contact_metadata ?? [];
-        $labels   = $metadata['labels'] ?? [];
+        $labels = $metadata['labels'] ?? [];
 
-        if ($label && !in_array($label, $labels)) {
+        if ($label && ! in_array($label, $labels)) {
             $labels[] = $label;
             $metadata['labels'] = $labels;
             $room->update(['contact_metadata' => $metadata]);

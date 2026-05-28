@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MessageCreated;
 use App\Http\Controllers\Controller;
 use App\Models\Bot;
 use App\Models\Message;
@@ -27,13 +28,13 @@ class BotController extends Controller
         $this->authorize('update', $workspace);
 
         $data = $request->validate([
-            'name'                 => ['required', 'string', 'max:80'],
-            'description'          => ['nullable', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:80'],
+            'description' => ['nullable', 'string', 'max:255'],
             'outgoing_webhook_url' => ['nullable', 'url'],
-            'subscribed_events'    => ['nullable', 'array'],
-            'channel_ids'          => ['nullable', 'array'],
-            'provider'             => ['nullable', 'string', 'in:whatsapp,slack,teams,custom'],
-            'provider_config'      => ['nullable', 'array'],
+            'subscribed_events' => ['nullable', 'array'],
+            'channel_ids' => ['nullable', 'array'],
+            'provider' => ['nullable', 'string', 'in:whatsapp,slack,teams,custom'],
+            'provider_config' => ['nullable', 'array'],
         ]);
 
         $bot = $workspace->bots()->create([
@@ -88,13 +89,13 @@ class BotController extends Controller
 
         // Create the message attributed to the bot (no real user)
         $message = Message::create([
-            'body'    => $payload['body'],
-            'type'    => 'text',
+            'body' => $payload['body'],
+            'type' => 'text',
             'user_id' => $bot->workspace->owner_id, // bot messages attributed to workspace owner for now
             'room_id' => $payload['channel_id'],
         ]);
 
-        broadcast(new \App\Events\MessageCreated($message));
+        broadcast(new MessageCreated($message));
 
         return response()->json(['ok' => true, 'message_id' => $message->id]);
     }
@@ -109,8 +110,12 @@ class BotController extends Controller
             ->get();
 
         foreach ($bots as $bot) {
-            if (! $bot->subscribedTo('message.created')) continue;
-            if (! $bot->allowsChannel($message->room_id)) continue;
+            if (! $bot->subscribedTo('message.created')) {
+                continue;
+            }
+            if (! $bot->allowsChannel($message->room_id)) {
+                continue;
+            }
 
             self::postToWebhook($bot, $message);
         }
@@ -120,12 +125,12 @@ class BotController extends Controller
     {
         try {
             Http::timeout(5)->post($bot->outgoing_webhook_url, [
-                'event'   => 'message.created',
+                'event' => 'message.created',
                 'channel' => ['id' => $message->room_id, 'name' => $message->room?->name],
                 'message' => [
-                    'id'         => $message->id,
-                    'body'       => $message->body,
-                    'sender'     => $message->user?->name,
+                    'id' => $message->id,
+                    'body' => $message->body,
+                    'sender' => $message->user?->name,
                     'created_at' => $message->created_at->toISOString(),
                 ],
                 'workspace' => ['id' => $message->room?->workspace_id],

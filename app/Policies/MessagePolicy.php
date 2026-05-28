@@ -15,6 +15,7 @@ class MessagePolicy
         if ($message->workspace_id === null) {
             return false;
         }
+
         return in_array($user->roleIn($message->workspace), ['owner', 'admin']);
     }
 
@@ -26,6 +27,7 @@ class MessagePolicy
         if ($message->workspace_id === null) {
             return false;
         }
+
         return in_array($user->roleIn($message->workspace), ['owner', 'admin']);
     }
 
@@ -34,6 +36,7 @@ class MessagePolicy
         if ($message->workspace_id === null) {
             return false;
         }
+
         return in_array($user->roleIn($message->workspace), ['owner', 'admin']);
     }
 }

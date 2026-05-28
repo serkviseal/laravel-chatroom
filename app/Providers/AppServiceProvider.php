@@ -8,15 +8,13 @@ use App\Jobs\SendWhatsAppMessage;
 use App\Models\Message;
 use App\Models\Room;
 use App\Models\StoredFile;
-use App\Models\Workspace;
 use App\Models\WhatsAppConversation;
+use App\Models\Workspace;
 use App\Policies\ChannelPolicy;
 use App\Policies\FilePolicy;
 use App\Policies\MessagePolicy;
 use App\Policies\WorkspacePolicy;
-use App\Services\BotRuleEngine;
 use App\Services\MessageParser;
-use App\Services\WhatsAppService;
 use App\Services\WorkspaceStorageService;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
@@ -39,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             $message = $event->message;
 
             // Only outbound messages from human agents (user_id set, not already from WA)
-            if (!$message->user_id || $message->origin === 'whatsapp') {
+            if (! $message->user_id || $message->origin === 'whatsapp') {
                 return;
             }
 

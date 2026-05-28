@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FileResource;
 use App\Jobs\DeleteFileJob;
-use App\Models\Room;
 use App\Models\StoredFile;
 use App\Models\Workspace;
 use App\Services\WorkspaceStorageService;
+use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -84,6 +85,7 @@ class FileController extends Controller
     public function share(Request $request, StoredFile $file): JsonResponse
     {
         $this->authorize('view', $file);
+
         return response()->json($file->shareLink());
     }
 
@@ -104,10 +106,11 @@ class FileController extends Controller
             ->firstOrFail();
 
         $disk = config('filesystems.default');
+
         return Storage::disk($disk)->download($file->disk_path, $file->filename);
     }
 
-    private function generateThumbnail(\Illuminate\Http\UploadedFile $file, int $workspaceId, string $disk): ?string
+    private function generateThumbnail(UploadedFile $file, int $workspaceId, string $disk): ?string
     {
         if (! extension_loaded('gd')) {
             return null;
@@ -126,8 +129,9 @@ class FileController extends Controller
             imagejpeg($thumb, $tmpPath, 80);
             imagedestroy($img);
             imagedestroy($thumb);
-            $stored = Storage::disk($disk)->putFile("workspaces/{$workspaceId}/thumbnails", new \Illuminate\Http\File($tmpPath));
+            $stored = Storage::disk($disk)->putFile("workspaces/{$workspaceId}/thumbnails", new File($tmpPath));
             @unlink($tmpPath);
+
             return $stored ?: null;
         } catch (\Throwable) {
             return null;

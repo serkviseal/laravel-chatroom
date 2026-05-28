@@ -16,7 +16,7 @@ class AgentAssistController extends Controller
         $this->authorize('view', $conversation->workspace);
 
         $apiKey = config('services.anthropic.key');
-        if (!$apiKey) {
+        if (! $apiKey) {
             return response()->json(['error' => 'AI not configured'], 503);
         }
 
@@ -26,7 +26,7 @@ class AgentAssistController extends Controller
             ->get()
             ->reverse()
             ->map(fn ($m) => [
-                'role'    => $m->origin === 'whatsapp' ? 'user' : 'assistant',
+                'role' => $m->origin === 'whatsapp' ? 'user' : 'assistant',
                 'content' => $m->body,
             ])
             ->values()
@@ -39,24 +39,24 @@ class AgentAssistController extends Controller
         $workspace = $conversation->workspace;
 
         $response = Http::withHeaders([
-            'x-api-key'         => $apiKey,
+            'x-api-key' => $apiKey,
             'anthropic-version' => '2023-06-01',
         ])->post('https://api.anthropic.com/v1/messages', [
-            'model'      => 'claude-haiku-4-5-20251001',
+            'model' => 'claude-haiku-4-5-20251001',
             'max_tokens' => 600,
-            'system'     => "You are a helpful customer support agent for {$workspace->name}. "
-                . "Generate 3 concise reply options. Return ONLY a JSON array: [{\"text\":\"...\"},{\"text\":\"...\"},{\"text\":\"...\"}]",
-            'messages'   => $history,
+            'system' => "You are a helpful customer support agent for {$workspace->name}. "
+                .'Generate 3 concise reply options. Return ONLY a JSON array: [{"text":"..."},{"text":"..."},{"text":"..."}]',
+            'messages' => $history,
         ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             return response()->json(['error' => 'AI request failed'], 502);
         }
 
-        $raw  = $response->json('content.0.text', '[]');
+        $raw = $response->json('content.0.text', '[]');
         $suggestions = json_decode($raw, true);
 
-        if (!is_array($suggestions)) {
+        if (! is_array($suggestions)) {
             $suggestions = [['text' => $raw]];
         }
 

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Room;
+use App\Events\MessageCreated;
 use App\Message;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use App\Events\MessageCreated;
 use Illuminate\Support\Facades\Log;
 
 class MessagesController extends Controller
@@ -14,8 +13,7 @@ class MessagesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -23,7 +21,7 @@ class MessagesController extends Controller
             $message = Message::create([
                 'body' => $request->get('body'),
                 'user_id' => $request->user()->id,
-                'room_id' => $request->get('room_id')
+                'room_id' => $request->get('room_id'),
             ]);
 
             broadcast(new MessageCreated($message->load('user')))->toOthers();
@@ -35,12 +33,12 @@ class MessagesController extends Controller
             ]);
 
             return response()->json([
-                'msg' => 'Error creating message', 
+                'msg' => 'Error creating message',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return response()->json([
-            'msg' => 'Message created'
-        ], Response::HTTP_CREATED);   
+            'msg' => 'Message created',
+        ], Response::HTTP_CREATED);
     }
 }

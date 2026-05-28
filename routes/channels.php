@@ -27,6 +27,7 @@ Broadcast::channel('workspace.{workspaceId}', function (User $user, int $workspa
         return false;
     }
     $pref = $user->preferenceIn($workspace);
+
     return [
         'id' => $user->id,
         'name' => $user->name,

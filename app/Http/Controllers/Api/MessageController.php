@@ -116,6 +116,7 @@ class MessageController extends Controller
         $this->authorize('pin', $message);
         $message->update(['is_pinned' => ! $message->is_pinned]);
         broadcast(new MessageUpdated($message->fresh('user')))->toOthers();
+
         return new MessageResource($message->load('user'));
     }
 }

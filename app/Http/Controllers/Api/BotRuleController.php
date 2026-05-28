@@ -24,14 +24,14 @@ class BotRuleController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'name'          => 'required|string|max:100',
-            'bot_id'        => 'nullable|exists:bots,id',
-            'trigger_type'  => 'required|in:keyword,regex,intent,always,outside_hours,first_contact,unassigned_timeout',
+            'name' => 'required|string|max:100',
+            'bot_id' => 'nullable|exists:bots,id',
+            'trigger_type' => 'required|in:keyword,regex,intent,always,outside_hours,first_contact,unassigned_timeout',
             'trigger_value' => 'nullable|string|max:500',
-            'action_type'   => 'required|in:reply,assign_agent,assign_bot,add_label,close,send_template,escalate_ai',
-            'action_value'  => 'nullable|array',
-            'priority'      => 'nullable|integer|min:1|max:9999',
-            'is_active'     => 'boolean',
+            'action_type' => 'required|in:reply,assign_agent,assign_bot,add_label,close,send_template,escalate_ai',
+            'action_value' => 'nullable|array',
+            'priority' => 'nullable|integer|min:1|max:9999',
+            'is_active' => 'boolean',
             'stop_on_match' => 'boolean',
         ]);
 
@@ -46,13 +46,13 @@ class BotRuleController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'name'          => 'sometimes|string|max:100',
-            'trigger_type'  => 'sometimes|in:keyword,regex,intent,always,outside_hours,first_contact,unassigned_timeout',
+            'name' => 'sometimes|string|max:100',
+            'trigger_type' => 'sometimes|in:keyword,regex,intent,always,outside_hours,first_contact,unassigned_timeout',
             'trigger_value' => 'nullable|string|max:500',
-            'action_type'   => 'sometimes|in:reply,assign_agent,assign_bot,add_label,close,send_template,escalate_ai',
-            'action_value'  => 'nullable|array',
-            'priority'      => 'sometimes|integer|min:1|max:9999',
-            'is_active'     => 'sometimes|boolean',
+            'action_type' => 'sometimes|in:reply,assign_agent,assign_bot,add_label,close,send_template,escalate_ai',
+            'action_value' => 'nullable|array',
+            'priority' => 'sometimes|integer|min:1|max:9999',
+            'is_active' => 'sometimes|boolean',
             'stop_on_match' => 'sometimes|boolean',
         ]);
 
@@ -74,7 +74,7 @@ class BotRuleController extends Controller
         $this->authorize('manage', $workspace);
 
         $data = $request->validate([
-            'order'   => 'required|array',
+            'order' => 'required|array',
             'order.*' => 'integer|exists:bot_rules,id',
         ]);
 

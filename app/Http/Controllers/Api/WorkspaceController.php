@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\WorkspaceResource;
 use App\Models\Workspace;
+use App\Services\WorkspaceStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -51,6 +52,7 @@ class WorkspaceController extends Controller
     public function show(Workspace $workspace): WorkspaceResource
     {
         $this->authorize('view', $workspace);
+
         return new WorkspaceResource($workspace->load('owner')->loadCount('members'));
     }
 
@@ -62,6 +64,7 @@ class WorkspaceController extends Controller
             'description' => ['nullable', 'string', 'max:500'],
         ]);
         $workspace->update($data);
+
         return new WorkspaceResource($workspace->load('owner')->loadCount('members'));
     }
 
@@ -70,6 +73,7 @@ class WorkspaceController extends Controller
         if (! $workspace->hasMember($request->user())) {
             $workspace->members()->attach($request->user(), ['role' => 'member', 'joined_at' => now()]);
         }
+
         return response()->json(['message' => 'Joined workspace']);
     }
 
@@ -79,6 +83,7 @@ class WorkspaceController extends Controller
             abort(422, 'Owner cannot leave the workspace.');
         }
         $workspace->members()->detach($request->user());
+
         return response()->json(['message' => 'Left workspace']);
     }
 
@@ -92,6 +97,7 @@ class WorkspaceController extends Controller
             'role' => $u->pivot->role,
             'joined_at' => $u->pivot->joined_at,
         ]);
+
         return response()->json(['data' => $members]);
     }
 
@@ -100,6 +106,7 @@ class WorkspaceController extends Controller
         $this->authorize('manageMembers', $workspace);
         $data = $request->validate(['role' => ['required', 'in:admin,member,guest']]);
         $workspace->members()->updateExistingPivot($userId, ['role' => $data['role']]);
+
         return response()->json(['message' => 'Role updated']);
     }
 
@@ -110,16 +117,18 @@ class WorkspaceController extends Controller
             abort(422, 'Cannot remove the workspace owner.');
         }
         $workspace->members()->detach($userId);
+
         return response()->json(['message' => 'Member removed']);
     }
 
     public function storageStats(Workspace $workspace): JsonResponse
     {
         $this->authorize('view', $workspace);
+
         return response()->json([
             'used_mb' => $workspace->storageUsedMb(),
             'quota_mb' => $workspace->storage_quota_mb,
-            'percent_used' => app(\App\Services\WorkspaceStorageService::class)->percentUsed($workspace),
+            'percent_used' => app(WorkspaceStorageService::class)->percentUsed($workspace),
         ]);
     }
 }

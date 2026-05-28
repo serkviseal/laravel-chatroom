@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WhatsAppAccount extends Model
 {
+    protected $table = 'whatsapp_accounts';
+
     protected $fillable = [
         'workspace_id', 'display_name', 'phone_number_id', 'waba_id',
         'access_token', 'verify_token', 'webhook_secret',
@@ -53,12 +55,12 @@ class WhatsAppAccount extends Model
         $day = strtolower($now->format('l'));
         $dayConfig = $hours[$day] ?? null;
 
-        if (!$dayConfig || !($dayConfig['enabled'] ?? false)) {
+        if (! $dayConfig || ! ($dayConfig['enabled'] ?? false)) {
             return false;
         }
 
         $start = $now->copy()->setTimeFromTimeString($dayConfig['start'] ?? '09:00');
-        $end   = $now->copy()->setTimeFromTimeString($dayConfig['end'] ?? '17:00');
+        $end = $now->copy()->setTimeFromTimeString($dayConfig['end'] ?? '17:00');
 
         return $now->between($start, $end);
     }
