@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WorkspacePreference extends Model
 {
+    protected $table = 'user_workspace_preferences';
+
     protected $fillable = [
         'user_id',
         'workspace_id',

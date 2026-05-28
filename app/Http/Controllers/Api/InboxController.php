@@ -36,9 +36,9 @@ class InboxController extends Controller
         return response()->json($conversations);
     }
 
-    public function assign(Request $request, Workspace $workspace, WhatsAppConversation $conversation): JsonResponse
+    public function assign(Request $request, WhatsAppConversation $conversation): JsonResponse
     {
-        $this->authorize('manage', $workspace);
+        $this->authorize('manage', $conversation->workspace);
 
         $data = $request->validate([
             'agent_id' => 'nullable|exists:users,id',
@@ -53,9 +53,9 @@ class InboxController extends Controller
         return response()->json($conversation->load(['assignedAgent', 'assignedBot']));
     }
 
-    public function updateStatus(Request $request, Workspace $workspace, WhatsAppConversation $conversation): JsonResponse
+    public function updateStatus(Request $request, WhatsAppConversation $conversation): JsonResponse
     {
-        $this->authorize('manage', $workspace);
+        $this->authorize('manage', $conversation->workspace);
 
         $data = $request->validate([
             'status' => 'required|in:open,pending,snoozed,resolved,spam',

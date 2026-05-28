@@ -22,6 +22,11 @@ class WorkspacePolicy
         return $user->roleIn($workspace) === 'owner';
     }
 
+    public function manage(User $user, Workspace $workspace): bool
+    {
+        return in_array($user->roleIn($workspace), ['owner', 'admin']);
+    }
+
     public function manageMembers(User $user, Workspace $workspace): bool
     {
         return in_array($user->roleIn($workspace), ['owner', 'admin']);

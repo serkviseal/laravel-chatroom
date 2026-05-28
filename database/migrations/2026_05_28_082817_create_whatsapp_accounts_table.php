@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
             $table->string('display_name');
-            $table->string('phone_number_id');
-            $table->string('waba_id');
+            $table->string('phone_number_id')->nullable();
+            $table->string('waba_id')->nullable();
             $table->text('access_token');
             $table->string('verify_token', 64)->unique();
             $table->string('webhook_secret')->nullable();
