@@ -51,17 +51,16 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16-alpine
         env:
-          MYSQL_DATABASE: chatroom_test
-          MYSQL_USER: chatroom
-          MYSQL_PASSWORD: secret
-          MYSQL_ROOT_PASSWORD: root_secret
+          POSTGRES_DB: chatroom_test
+          POSTGRES_USER: chatroom
+          POSTGRES_PASSWORD: secret
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="pg_isready -U chatroom"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
@@ -83,21 +82,25 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, pdo_mysql, redis, zip, gd, bcmath
+          extensions: mbstring, pdo_pgsql, redis, zip, gd, bcmath
           coverage: xdebug
 
       - name: Install PHP dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Copy environment file
-        run: cp .env.example .env
-
       - name: Configure test environment
         run: |
+          cp .env.example .env
           php artisan key:generate
-          sed -i 's/DB_DATABASE=chatroom/DB_DATABASE=chatroom_test/' .env
-          sed -i 's/BROADCAST_CONNECTION=reverb/BROADCAST_CONNECTION=log/' .env
-          sed -i 's/QUEUE_CONNECTION=redis/QUEUE_CONNECTION=sync/' .env
+          echo "DB_CONNECTION=pgsql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_DATABASE=chatroom_test" >> .env
+          echo "DB_USERNAME=chatroom" >> .env
+          echo "DB_PASSWORD=secret" >> .env
+          echo "BROADCAST_CONNECTION=log" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
+          echo "SCOUT_DRIVER=database" >> .env
 
       - name: Run migrations
         run: php artisan migrate --force

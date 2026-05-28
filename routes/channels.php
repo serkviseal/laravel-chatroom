@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\Broadcast;
 
 // Private notification channel per user
@@ -17,6 +18,23 @@ Broadcast::channel('room.{roomId}', function (User $user, int $roomId) {
             'avatar_url' => $user->avatar_url,
         ];
     }
+});
+
+// Presence channel for a workspace — all online members
+Broadcast::channel('workspace.{workspaceId}', function (User $user, int $workspaceId) {
+    $workspace = Workspace::find($workspaceId);
+    if (! $workspace || ! $workspace->hasMember($user)) {
+        return false;
+    }
+    $pref = $user->preferenceIn($workspace);
+    return [
+        'id' => $user->id,
+        'name' => $user->name,
+        'avatar_url' => $user->avatar_url,
+        'status' => $pref->status,
+        'status_emoji' => $pref->status_emoji,
+        'status_text' => $pref->status_text,
+    ];
 });
 
 // Private channel for 1-on-1 direct messages

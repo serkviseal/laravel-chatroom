@@ -9,17 +9,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
+use App\Jobs\SendMentionNotification;
 use App\Models\Message;
 use App\Models\Room;
+use App\Services\MessageParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MessageController extends Controller
 {
+    public function __construct(private readonly MessageParser $parser) {}
+
     public function index(Room $room): AnonymousResourceCollection
     {
         $messages = $room->messages()
+            ->threadRoots()
             ->with('user', 'reactions')
             ->latest()
             ->paginate(50);
@@ -48,6 +53,13 @@ class MessageController extends Controller
 
         broadcast(new MessageCreated($message))->toOthers();
 
+        // Dispatch mention notifications
+        if ($message->body) {
+            foreach ($this->parser->extractMentions($message->body) as $name) {
+                dispatch(new SendMentionNotification($message, $name));
+            }
+        }
+
         return new MessageResource($message);
     }
 
@@ -65,7 +77,7 @@ class MessageController extends Controller
 
     public function destroy(Request $request, Message $message): JsonResponse
     {
-        abort_if($message->user_id !== $request->user()->id, 403);
+        $this->authorize('delete', $message);
 
         $message->delete();
 
@@ -97,5 +109,13 @@ class MessageController extends Controller
         broadcast(new MessageReacted($message))->toOthers();
 
         return new MessageResource($message);
+    }
+
+    public function pin(Request $request, Message $message): MessageResource
+    {
+        $this->authorize('pin', $message);
+        $message->update(['is_pinned' => ! $message->is_pinned]);
+        broadcast(new MessageUpdated($message->fresh('user')))->toOthers();
+        return new MessageResource($message->load('user'));
     }
 }

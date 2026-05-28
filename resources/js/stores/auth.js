@@ -30,5 +30,17 @@ export const useAuthStore = defineStore('auth', () => {
         loading.value = false
     }
 
-    return { user, loading, fetchUser, logout, updateAvatar }
+    async function updateStatus(workspaceId, status, statusEmoji = null, statusText = null) {
+        const { data } = await axios.patch('/api/v1/user/status', {
+            workspace_id: workspaceId,
+            status,
+            status_emoji: statusEmoji,
+            status_text: statusText,
+        })
+        if (user.value) {
+            user.value.preferences = { ...user.value.preferences, ...data }
+        }
+    }
+
+    return { user, loading, fetchUser, logout, updateAvatar, updateStatus }
 })

@@ -58,6 +58,22 @@ class User extends Authenticatable
         return $this->hasMany(DirectMessage::class, 'recipient_id');
     }
 
+    public function workspaces(): BelongsToMany
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_user')
+            ->withPivot('role', 'joined_at', 'last_seen_at');
+    }
+
+    public function workspacePreferences(): HasMany
+    {
+        return $this->hasMany(WorkspacePreference::class);
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(StoredFile::class, 'uploader_id');
+    }
+
     public function addRoom(Room $room): void
     {
         $this->rooms()->attach($room);
@@ -66,6 +82,24 @@ class User extends Authenticatable
     public function hasJoined(int $roomId): bool
     {
         return $this->rooms()->where('rooms.id', $roomId)->exists();
+    }
+
+    public function isMemberOf(Workspace $workspace): bool
+    {
+        return $this->workspaces()->where('workspaces.id', $workspace->id)->exists();
+    }
+
+    public function roleIn(Workspace $workspace): ?string
+    {
+        return $this->workspaces()->where('workspaces.id', $workspace->id)->value('role');
+    }
+
+    public function preferenceIn(Workspace $workspace): WorkspacePreference
+    {
+        return WorkspacePreference::firstOrCreate(
+            ['user_id' => $this->id, 'workspace_id' => $workspace->id],
+            ['notification_preference' => 'all', 'status' => 'offline']
+        );
     }
 
     public function getAvatarUrlAttribute(): string

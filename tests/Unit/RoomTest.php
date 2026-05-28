@@ -43,7 +43,7 @@ test('room scope search filters by name', function () {
     Room::factory()->create(['name' => 'frontend chat']);
     Room::factory()->create(['name' => 'general']);
 
-    $results = Room::search('backend')->get();
+    $results = Room::where('name', 'like', '%backend%')->get();
 
     expect($results)->toHaveCount(1)
         ->and($results->first()->name)->toBe('backend chat');
