@@ -27,8 +27,14 @@ class WhatsAppAccountController extends Controller
 
         $data = $request->validate([
             'display_name'    => 'required|string|max:100',
-            'phone_number_id' => 'required|string',
-            'waba_id'         => 'required|string',
+            'provider'        => 'nullable|in:meta,twilio',
+            // Meta fields
+            'phone_number_id' => 'nullable|string',
+            'waba_id'         => 'nullable|string',
+            // Twilio fields
+            'account_sid'     => 'nullable|string',
+            'from_number'     => 'nullable|string',
+            // Shared
             'access_token'    => 'required|string',
             'webhook_secret'  => 'nullable|string',
             'business_hours'  => 'nullable|array',

@@ -12,6 +12,7 @@ class WhatsAppAccount extends Model
         'workspace_id', 'display_name', 'phone_number_id', 'waba_id',
         'access_token', 'verify_token', 'webhook_secret',
         'business_hours', 'welcome_template', 'is_active',
+        'provider', 'account_sid', 'from_number',
     ];
 
     protected $casts = [
