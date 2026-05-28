@@ -36,6 +36,21 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         currentWorkspace.value = ws
     }
 
+    async function loadFromRoute(slug) {
+        if (!slug) return
+        // Already loaded with matching slug
+        if (currentWorkspace.value?.slug === slug) return
+        // Find in cached list first
+        if (workspaces.value.length === 0) await fetchWorkspaces()
+        const found = workspaces.value.find(w => w.slug === slug)
+        if (found) { currentWorkspace.value = found; return }
+        // Fallback: fetch by slug from API
+        try {
+            const { data } = await axios.get(`/api/v1/workspaces/${slug}`)
+            currentWorkspace.value = data.data
+        } catch { /* workspace not found or no access */ }
+    }
+
     async function fetchStorageStats(workspaceId) {
         const { data } = await axios.get(`/api/v1/workspaces/${workspaceId}/storage`)
         return data
@@ -58,6 +73,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
         createWorkspace,
         joinWorkspace,
         setCurrentWorkspace,
+        loadFromRoute,
         fetchStorageStats,
         updateMemberRole,
         removeMember,

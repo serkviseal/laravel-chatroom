@@ -3,14 +3,12 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './components/AppShell.vue'
+import { useAuthStore } from './stores/auth'
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        {
-            path: '/',
-            redirect: '/home',
-        },
+        { path: '/', redirect: '/home' },
         {
             path: '/home',
             component: () => import('./components/WorkspaceSelector.vue'),
@@ -32,7 +30,31 @@ const router = createRouter({
     ],
 })
 
+// ── Auth guard ────────────────────────────────────────────────────
+let authResolved = false
+
+router.beforeEach(async (to) => {
+    if (!to.meta.requiresAuth) return true
+
+    const auth = useAuthStore()
+
+    // Fetch user once per page load
+    if (!authResolved) {
+        await auth.fetchUser()
+        authResolved = true
+    }
+
+    if (!auth.user) {
+        // Preserve intended destination so we can redirect after login
+        window.location.href = `/login?redirect=${encodeURIComponent(to.fullPath)}`
+        return false
+    }
+
+    return true
+})
+
 const app = createApp(App)
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
 app.mount('#app')

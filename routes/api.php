@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\MessageController;
@@ -67,4 +68,13 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/rooms/{room}/messages/{message}/replies', [ThreadController::class, 'index']);
     Route::post('/rooms/{room}/messages/{message}/replies', [ThreadController::class, 'store'])
         ->middleware('throttle:60,1');
+
+    // Bots & Integrations (workspace admin only)
+    Route::get('/workspaces/{workspace}/bots', [BotController::class, 'index']);
+    Route::post('/workspaces/{workspace}/bots', [BotController::class, 'store']);
+    Route::post('/workspaces/{workspace}/bots/{bot}/token', [BotController::class, 'regenerateToken']);
+    Route::delete('/workspaces/{workspace}/bots/{bot}', [BotController::class, 'destroy']);
 });
+
+// Incoming webhook — public but token-authenticated
+Route::post('/webhooks/incoming/{token}', [BotController::class, 'incoming']);

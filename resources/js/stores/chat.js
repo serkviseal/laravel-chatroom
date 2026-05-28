@@ -9,6 +9,7 @@ export const useChatStore = defineStore('chat', () => {
     const messagesByRoom = ref({})
     const onlineUsers = ref({})
     const typingUsers = ref({})
+    const typingTimers = {}
 
     const activeRoom = computed(() => rooms.value.find(r => r.id === activeRoomId.value))
     const activeMessages = computed(() => messagesByRoom.value[activeRoomId.value] ?? [])
@@ -99,13 +100,14 @@ export const useChatStore = defineStore('chat', () => {
             .listen('MessageReacted', msg => replaceMessage(msg))
             .listenForWhisper('typing', ({ user }) => {
                 if (!typingUsers.value[roomId]) typingUsers.value[roomId] = {}
-                typingUsers.value[roomId][user.id] = user.name
+                typingUsers.value[roomId][user.id] = user  // store full user object
 
-                setTimeout(() => {
+                clearTimeout(typingTimers[user.id])
+                typingTimers[user.id] = setTimeout(() => {
                     if (typingUsers.value[roomId]) {
                         delete typingUsers.value[roomId][user.id]
                     }
-                }, 2000)
+                }, 3000)
             })
     }
 
