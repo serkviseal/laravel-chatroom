@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "048bdaabc7fe956a50528daf0571cbab",
+    "content-hash": "c3a036ccdd63ccdbc24f55a94b5e11b9",
     "packages": [
         {
             "name": "brick/math",
@@ -1729,16 +1729,16 @@
         },
         {
             "name": "laravel/scout",
-            "version": "v11.2.0",
+            "version": "v10.25.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/scout.git",
-                "reference": "5a267813fe0d7bca58b993c3bae592b2c814591e"
+                "reference": "f28630dca44a63d80c15e596bedc5af42c8985d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/scout/zipball/5a267813fe0d7bca58b993c3bae592b2c814591e",
-                "reference": "5a267813fe0d7bca58b993c3bae592b2c814591e",
+                "url": "https://api.github.com/repos/laravel/scout/zipball/f28630dca44a63d80c15e596bedc5af42c8985d5",
+                "reference": "f28630dca44a63d80c15e596bedc5af42c8985d5",
                 "shasum": ""
             },
             "require": {
@@ -1777,7 +1777,7 @@
                     ]
                 },
                 "branch-alias": {
-                    "dev-master": "11.x-dev"
+                    "dev-master": "10.x-dev"
                 }
             },
             "autoload": {
@@ -1805,7 +1805,7 @@
                 "issues": "https://github.com/laravel/scout/issues",
                 "source": "https://github.com/laravel/scout"
             },
-            "time": "2026-05-13T15:50:06+00:00"
+            "time": "2026-03-10T16:16:46+00:00"
         },
         {
             "name": "laravel/sentinel",

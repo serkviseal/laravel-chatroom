@@ -10,9 +10,9 @@
         "laravel/horizon": "^5.0",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
-        "laravel/scout": "^11.2",
+        "laravel/scout": "^10.0",
         "laravel/tinker": "^2.0",
-        "league/commonmark": "^2.8",
+        "league/commonmark": "^2.4",
         "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
