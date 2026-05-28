@@ -17,3 +17,6 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::get('/home', fn () => view('home'))->name('home')->middleware('auth');
+
+// SPA catch-all — Vue Router handles /w/*, /home sub-paths, etc.
+Route::get('/{any}', fn () => view('home'))->where('any', '.*')->middleware('auth');
